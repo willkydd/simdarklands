@@ -1,3 +1,3 @@
-__author__ = 'wilkydd'
+__author__ = 'willkydd'
 
 print(1 + 1)
