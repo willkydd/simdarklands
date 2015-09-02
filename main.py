@@ -1,3 +1,10 @@
 __author__ = 'willkydd'
 
-print(1 + 1)
+import biography
+
+# print(attributes.AttributeList[0])
+
+bio = biography.Biography()
+bio.setSex(2)
+
+print(bio.toCSV())
