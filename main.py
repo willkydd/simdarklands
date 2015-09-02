@@ -16,53 +16,64 @@ def explo(bio, phase, subphase):
     if phase == 1:
         # picking sex
         opath = bio.path
-        for sex in range(1, 3):
-            bio.path = opath + "|" + definitions.sexList[sex]
+        for sex in range(0, len(definitions.Sexes)):
+            bio.path = opath + "|" + definitions.Sexes[sex]
             for i in range(0, definitions.attributeCount):
-                bio.attributes[i] += definitions.sexAttributes[sex][i]
+                bio.attributes[i] += definitions.sexAttributeOffsets[sex][i]
             bio.age += 0
+            bio.sex = sex
             print(bio.toCSV())
             explo(bio, phase + 1, 0)
             for i in range(0, definitions.attributeCount):
-                bio.attributes[i] -= definitions.sexAttributes[sex][i]
+                bio.attributes[i] -= definitions.sexAttributeOffsets[sex][i]
             bio.age -= 0
             bio.path = opath
-    if phase == 2:
+            bio.sex = -1
+    if phase == 2 and subphase == 0:
         opath = bio.path
-        for childhood in range(0, len(definitions.childhoods)):
-            bio.path = opath + "|" + definitions.childhoods[childhood]
+        for childhood in range(0, len(definitions.Childhoods)):
+            bio.path = opath + "|" + definitions.Childhoods[childhood]
             for i in range(0, definitions.attributeCount):
-                bio.attributes[i] += definitions.childhoodsAttributeOffsets[childhood][i]
+                bio.attributes[i] += definitions.childhoodAttributeOffsets[childhood][i]
             for i in range(0, definitions.skillCount):
-                bio.skills[i] += definitions.childhoodsSkillOffsets[childhood][i]
-            bio.EP += definitions.childhoodEPs[childhood]
+                bio.skills[i] += definitions.childhoodSkillOffsets[childhood][i]
+            bio.EP += definitions.childhoodEPOffsets[childhood]
             bio.age += 15
+            bio.childhood = childhood
             print(bio.toCSV())
-            explo(bio, phase + 1, 0)
+            explo(bio, phase, subphase + 1)
             for i in range(0, definitions.attributeCount):
-                bio.attributes[i] -= definitions.childhoodsAttributeOffsets[childhood][i]
+                bio.attributes[i] -= definitions.childhoodAttributeOffsets[childhood][i]
             for i in range(0, definitions.skillCount):
-                bio.skills[i] -= definitions.childhoodsSkillOffsets[childhood][i]
-            bio.EP -= definitions.childhoodEPs[childhood]
+                bio.skills[i] -= definitions.childhoodSkillOffsets[childhood][i]
+            bio.EP -= definitions.childhoodEPOffsets[childhood]
             bio.age -= 15
             bio.path = opath
-    if phase == 3:
+            bio.childhood = -1
+    if phase == 2 and subphase > 0:
         # pick way to distribute childhood ep to attributes
         opath = bio.path
-        for attr in range(0, definitions.attributeCount):
+        if bio.getLastAttributeIncreased() == -1:
+            minAttr = 0
+        else:
+            minAttr = bio.getLastAttributeIncreased()
+        for attr in range(minAttr, definitions.attributeCount):
             if bio.canIncreaseAttribute(attr):
-                bio.path = bio.path + "|" + "+" + definitions.AttributeList[attr][0]
+                bio.path = bio.path + "|" + "+" + definitions.Attributes[attr][0]
                 bio.attributes[attr] += 1
                 bio.EP -= bio.attributeIncreaseCost(attr)
-                # print(bio.toCSV())
+                # print(str(subphase)+":"+bio.toCSV())
                 explo(bio, phase, subphase + 1)
-                # this needs to be enabled later
-                # explo(bio,phase+1,0)
+                explo(bio, phase + 1, 0)
                 bio.path = opath
                 bio.attributes[attr] -= 1
                 bio.EP += bio.attributeIncreaseCost(attr)
         explo(bio, phase + 1, 0)
-    if phase == 4:
+    if phase >= 3 and subphase == 0:
+        # pick occupation
+        print(bio.toCSV())
+    if phase >= 3 and subphase > 0:
+        # assign points to skills (attributes are fixed)
         print(bio.toCSV())
 
 
