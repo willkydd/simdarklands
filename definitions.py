@@ -1,40 +1,53 @@
 __author__ = 'willkydd'
 
-AttributeList = [[0, "End", "Endurance"],
-                 [2, "Str", "Strength"],
-                 [3, "Agi", "Agility"],
-                 [4, "Per", "Perception"],
-                 [5, "Int", "Intelligence"],
-                 [6, "Chr", "Charisma"]]
+AttributeList = [["End", "Endurance"],
+                 ["Str", "Strength"],
+                 ["Agi", "Agility"],
+                 ["Per", "Perception"],
+                 ["Int", "Intelligence"],
+                 ["Chr", "Charisma"]]
 
-SkillList = [[0, "wEdg", "Edge Weapons"],
-             [1, "wImp", "Imp Weapons"],
-             [2, "wFll", "Foil"],
-             [3, "wPol", "Polearms"],
-             [4, "wThr", "Thrown Weapons"],
-             [5, "wBow", "Bows"],
-             [6, "wMsD", "Missile Weapons"],
+SkillList = [["wEdg", "Edge Weapons"],
+             ["wImp", "Imp Weapons"],
+             ["wFll", "Foil"],
+             ["wPol", "Polearms"],
+             ["wThr", "Thrown Weapons"],
+             ["wBow", "Bows"],
+             ["wMsD", "Missile Weapons"],
 
-             [7, "Alch", "Alchemy"],
-             [8, "Relg", "Religion"],
-             [9, "SpkC", "Common"],
-             [10, "SpkL", "Latin"],
-             [11, "R&W", "Reading & Writing"],
+             ["Alch", "Alchemy"],
+             ["Relg", "Religion"],
+             ["SpkC", "Common"],
+             ["SpkL", "Latin"],
+             ["R&W", "Reading & Writing"],
 
-             [12, "Heal", "Healing"],
-             [13, "Artf", "Artificing"],
-             [14, "Stlh", "Stealth"],
-             [15, "StrW", "Streetwise"],
-             [16, "Ride", "Riding"],
-             [17, "WdWs", "Woodwise"]]
+             ["Heal", "Healing"],
+             ["Artf", "Artificing"],
+             ["Stlh", "Stealth"],
+             ["StrW", "Streetwise"],
+             ["Ride", "Riding"],
+             ["WdWs", "Woodwise"]]
 
-sexList = [[0, "undefined"],
-           [1, "male"],
-           [2, "female"]]
+sexList = ["undefined", "male", "female"]
 
 sexAttributes = [[0, 0, 0, 0, 0, 0],
                  [13, 16, 12, 13, 12, 12],
                  [15, 13, 12, 13, 12, 13]]
+
+childhoods = ["Nobility", "Wealthy Urban", "Town Trades", "Country Crafts", "Urban Commoners", "Country Commoners"]
+childhoodsAttributeOffsets = [[0, 0, 0, 0, 0, 0],
+                              [-1, 0, 0, 1, 1, 0],
+                              [-1, -1, 0, 1, 2, 0],
+                              [0, 0, 1, 0, 1, 0],
+                              [0, 1, 1, 0, -1, -1],
+                              [1, 1, 1, 0, 0, -1]]
+childhoodEPs = [89, 90, 93, 94, 96, 97]
+childhoodsSkillOffsets = [[5, 4, 1, 4, 0, 4, 0, 2, 5, 2, 4, 2, 2, 0, 0, 1, 0, 3, 1],
+                          [4, 3, 0, 3, 0, 0, 3, 2, 5, 1, 5, 1, 5, 1, 1, 1, 2, 2, 0],
+                          [4, 5, 0, 3, 0, 0, 4, 1, 4, 1, 4, 0, 1, 1, 5, 1, 3, 0, 0],
+                          [4, 3, 0, 4, 1, 4, 1, 0, 2, 1, 3, 0, 1, 1, 4, 1, 0, 0, 3],
+                          [4, 4, 0, 3, 3, 0, 2, 0, 2, 1, 2, 0, 0, 1, 1, 4, 4, 0, 0],
+                          [3, 3, 4, 3, 3, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 3, 0, 1, 4]]
 
 attributeCount = len(AttributeList)
 skillCount = len(SkillList)

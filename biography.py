@@ -5,16 +5,37 @@ import definitions
 class Biography:
     attributes = [0] * definitions.attributeCount
     skills = [0] * definitions.skillCount
-    sex = 0
-
-    def oneLine(self):
-        return definitions.sexList[self.sex][1] + " | " + \
-               str(self.attributes) + " | " + str(self.skills)
+    age = 0
+    path = ""
+    EP = 0
 
     def toCSV(self):
-        return definitions.sexList[self.sex][1] + ", " + \
-               str(self.attributes).strip("[]") + ", " + str(self.skills).strip("[]")
+        return str(self.age) + ", " + str(self.EP) + ", " + \
+               str(self.attributes).strip("[]") + ", " + str(self.skills).strip("[]") + ", " + str(self.path)
 
-    def setSex(self, tsex):
-        self.attributes = definitions.sexAttributes[tsex]
-        self.sex = tsex
+    def canIncreaseAttribute(self, attributeNo):
+        # children cannot increase attributes over 40
+        if self.attributes[attributeNo] >= 40 and self.age == 15:
+            return False
+
+        # up to 30 1 point per, 30 to 39 2 points per and 40 costs 3 points
+        if self.attributes[attributeNo] < 30:
+            epcost = 1
+        else:
+            if self.attributes[attributeNo] < 40:
+                epcost = 2
+            else:
+                epcost = 3
+        if self.EP >= epcost:
+            return True
+        else:
+            return False
+
+    def attributeIncreaseCost(self, attributeNo):
+        if self.attributes[attributeNo] < 30:
+            return 1
+        else:
+            if self.attributes[attributeNo] < 40:
+                return 2
+            else:
+                return 3
