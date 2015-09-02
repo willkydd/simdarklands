@@ -8,6 +8,10 @@ class Biography:
     age = 0
     path = ""
     EP = 0
+    childhood = -1
+    sex = -1
+    occupations = []
+
 
     def toCSV(self):
         return str(self.age) + ", " + str(self.EP) + ", " + \
@@ -39,3 +43,11 @@ class Biography:
                 return 2
             else:
                 return 3
+
+    def getLastAttributeIncreased(self):
+        switcher = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
+        s = self.path.split("|").pop()
+        if s[0] == "+":
+            return switcher.get(s.split("+")[1])
+        else:
+            return -1

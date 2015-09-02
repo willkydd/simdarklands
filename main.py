@@ -62,13 +62,12 @@ def explo(bio, phase, subphase):
                 bio.path = bio.path + "|" + "+" + definitions.Attributes[attr][0]
                 bio.attributes[attr] += 1
                 bio.EP -= bio.attributeIncreaseCost(attr)
-                # print(str(subphase)+":"+bio.toCSV())
                 explo(bio, phase, subphase + 1)
-                explo(bio, phase + 1, 0)
                 bio.path = opath
                 bio.attributes[attr] -= 1
                 bio.EP += bio.attributeIncreaseCost(attr)
-        explo(bio, phase + 1, 0)
+        if bio.EP == 0:
+            explo(bio, phase + 1, 0)
     if phase >= 3 and subphase == 0:
         # pick occupation
         print(bio.toCSV())
