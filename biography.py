@@ -3,15 +3,14 @@ import definitions
 
 
 class Biography:
-    attributes = [0] * definitions.attributeCount
-    skills = [0] * definitions.skillCount
+    attributes = [0] * len(definitions.Attributes)
+    skills = [0] * len(definitions.Skills)
     age = 0
     path = ""
     EP = 0
     childhood = -1
     sex = -1
     occupations = []
-
 
     def toCSV(self):
         return str(self.age) + ", " + str(self.EP) + ", " + \
@@ -45,9 +44,65 @@ class Biography:
                 return 3
 
     def getLastAttributeIncreased(self):
-        switcher = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
-        s = self.path.split("|").pop()
-        if s[0] == "+":
-            return switcher.get(s.split("+")[1])
+        # switcher = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
+        switcher = {}
+        for i in range(0, len(definitions.Attributes)):
+            switcher[definitions.Attributes[i][0]] = i
+        if self.path[-4] == "+":
+            return switcher.get(self.path[-3] + self.path[-2] + self.path[-1])
         else:
             return -1
+
+    def getLastSkillIncreased(self):
+        switcher = {}
+        for i in range(0, len(definitions.Skills)):
+            switcher[definitions.Skills[i][0]] = i
+        if self.path[-5] == "+":
+            return switcher.get(self.path[-3] + self.path[-2] + self.path[-1])
+        else:
+            return -1
+
+    def EPNeededToRaiseAttributeTo(self, attrNo, target):
+        x = self.attributes[attrNo]
+        y = target
+        if x >= y:
+            return 0
+        else:
+            return self.EPNeededToRaiseAttributeFrom1toX(y) - self.EPNeededToRaiseAttributeFrom1toX(x)
+
+    def EPNeededToRaiseAttributeFrom1toX(self, x):
+        retval = 0
+        if x <= 29:
+            retval = x
+        if x > 29 and x <= 39:
+            retval = 29 + (x - 29) * 2
+        if x > 39:
+            retval = 29 + 20 + (x - 39) * 3
+        return retval
+
+    def failChildHoodMinAttributes(self):
+        epNeeded = 0
+        for i in range(0, len(definitions.ChildHoodAttributeFloors)):
+            epNeeded += self.EPNeededToRaiseAttributeTo(i, definitions.ChildHoodAttributeFloors[i])
+            if self.EP < epNeeded:
+                return True
+        # if self.EP<epNeeded:
+        #    print("aborting:")
+        #    print(self.toCSV())
+        return self.EP < epNeeded
+
+    def EPNeededToRaiseSkillFrom1toX(self, x):
+        retval = 0
+        if x <= 49:
+            retval = x
+        if x > 49:
+            retval = 49 + (x - 49) * 2
+        return retval
+
+    def EPNeededToRaiseSkillTo(self, skillNo, target):
+        x = self.skills[skillNo]
+        y = target
+        if x >= y:
+            return 0
+        else:
+            return self.EPNeededToRaiseSkillFrom1toX(y) - self.EPNeededToRaiseSkillFrom1toX(x)
