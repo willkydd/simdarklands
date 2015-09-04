@@ -3,8 +3,8 @@ import definitions
 
 
 class Biography:
-    attributes = [0] * len(definitions.Attributes)
-    skills = [0] * len(definitions.Skills)
+    attributes = [0] * len(definitions.attributes)
+    skills = [0] * len(definitions.skills)
     age = 0
     path = ""
     EP = 0
@@ -14,7 +14,7 @@ class Biography:
 
     def toCSV(self):
         return str(self.age) + ", " + str(self.EP) + ", " + \
-               str(self.attributes).strip("[]") + ", " + str(self.skills).strip("[]") + ", " + str(self.path)
+               str(self.attributes).strip("[]") + ", " + str(self.skills).strip("[]") + ", " + self.shrinkPath()
 
     def canIncreaseAttribute(self, attributeNo):
         # children cannot increase attributes over 40
@@ -43,11 +43,17 @@ class Biography:
             else:
                 return 3
 
+    def skillIncreaseCost(self, skillNo):
+        if self.skills[skillNo] < 50:
+            return 1
+        else:
+            return 2
+
     def getLastAttributeIncreased(self):
         # switcher = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
         switcher = {}
-        for i in range(0, len(definitions.Attributes)):
-            switcher[definitions.Attributes[i][0]] = i
+        for i in range(0, len(definitions.attributes)):
+            switcher[definitions.attributes[i][0]] = i
         if self.path[-4] == "+":
             return switcher.get(self.path[-3] + self.path[-2] + self.path[-1])
         else:
@@ -55,10 +61,10 @@ class Biography:
 
     def getLastSkillIncreased(self):
         switcher = {}
-        for i in range(0, len(definitions.Skills)):
-            switcher[definitions.Skills[i][0]] = i
+        for i in range(0, len(definitions.skills)):
+            switcher[definitions.skills[i][0]] = i
         if self.path[-5] == "+":
-            return switcher.get(self.path[-3] + self.path[-2] + self.path[-1])
+            return switcher.get(self.path[-4] + self.path[-3] + self.path[-2] + self.path[-1])
         else:
             return -1
 
@@ -82,8 +88,8 @@ class Biography:
 
     def failChildHoodMinAttributes(self):
         epNeeded = 0
-        for i in range(0, len(definitions.ChildHoodAttributeFloors)):
-            epNeeded += self.EPNeededToRaiseAttributeTo(i, definitions.ChildHoodAttributeFloors[i])
+        for i in range(0, len(definitions.CHILDHOOD_ATTR_FLOORS)):
+            epNeeded += self.EPNeededToRaiseAttributeTo(i, definitions.CHILDHOOD_ATTR_FLOORS[i])
             if self.EP < epNeeded:
                 return True
         # if self.EP<epNeeded:
@@ -106,3 +112,53 @@ class Biography:
             return 0
         else:
             return self.EPNeededToRaiseSkillFrom1toX(y) - self.EPNeededToRaiseSkillFrom1toX(x)
+
+    def canIncreaseSkill(self, skillNo):
+        return self.EP >= self.EPNeededToRaiseSkillTo(skillNo, self.skills[skillNo] + 1)
+
+    def shrinkPath(self):
+        result = ""
+        ele = self.path.split("|")
+        idx = 0
+        while idx < len(ele):
+            cnt = 1
+            result += "|" + ele[idx]
+            if idx + 1 < len(ele):
+                while ele[idx] == ele[idx + 1]:
+                    cnt += 1
+                    idx += 1
+                    if idx + 1 >= len(ele):
+                        break
+                if cnt > 1:
+                    result += "x" + str(cnt)
+            idx += 1
+        return result
+
+    def getAttribute(self, attr):
+        return self.attributes[definitions.attributeindices[attr]]
+
+    def getSkill(self, skl):
+        return self.skills[definitions.skillindices[skl]]
+
+    def hasExperienceAsAnyOf(self, professions):
+        for i in range(0, len(professions)):
+            if professions[i] in self.path:
+                return True
+        return False
+
+    def getLastProfession(self):
+        if len(self.occupations) == 0:
+            return -1
+        else:
+            return self.occupations[-1]
+
+    def lastProfessionIn(self, professions):
+        if len(professions) == 0:
+            return False
+        lp = self.getLastProfession()
+        if lp == -1:
+            return False
+        for i in range(0, len(professions)):
+            if definitions.professionindices[professions[i]] == lp:
+                return True
+        return False
