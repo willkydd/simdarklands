@@ -146,16 +146,27 @@ class Biography:
                 return True
         return False
 
-    def getLastProfession(self):
+    def getLastProfession(self, levels):
         if len(self.occupations) == 0:
             return -1
         else:
-            return self.occupations[-1]
+            return self.occupations[-levels]
 
     def lastProfessionIn(self, professions):
         if len(professions) == 0:
             return False
-        lp = self.getLastProfession()
+        lp = self.getLastProfession(1)
+        if lp == -1:
+            return False
+        for i in range(0, len(professions)):
+            if definitions.professionindices[professions[i]] == lp:
+                return True
+        return False
+
+    def prevProfessionIn(self, professions, level):
+        if len(professions) == 0:
+            return False
+        lp = self.getLastProfession(level)
         if lp == -1:
             return False
         for i in range(0, len(professions)):

@@ -135,6 +135,37 @@ def explo(bio, phase, subphase):
                                     bio.hasExperienceAsAnyOf(["Manorial Lord", "Knight"]) or bio.lastProfessionIn(
                                     ["Captain", "Courtier", "Noble Heir", "Abbot", "Bishop"]) or (
                                             "Nobility" in bio.path and bio.age >= 20)))) or \
+                    (pName == "Manorial Lord" and not (bio.getLastProfession() == "Manorial Lord" or (
+                                bio.prevProfessionIn(["Noble Heir", "Courtier", "Abbot", "Bishop"],
+                                                     1) and bio.prevProfessionIn(
+                                ["Noble Heir", "Courtier", "Abbot", "Bishop"], 2)))) or \
+                    (pName == "Hermit" and not bio.getSkill("Virt") >= 15) or \
+                    (pName == "Novice Monk/Nun" and not (
+                                not "Novice Monk/Nun" in bio.path and not (
+                                                        bio.getAttribute("Per") >= 15 and bio.getAttribute(
+                                                    "Int") >= 15 and bio.getAttribute("Chr") >= 15 and bio.getSkill(
+                                            "Relg") >= 5 and bio.hasExperienceAsAnyOf(
+                                        ["Noble Heir", "Courtier", "Manorial Lord", "Novice Mon/Nun", "Monk/Nun",
+                                         "Friar",
+                                         "Priest",
+                                         "Abbot", "Bishop", "Student", "Clerk", "Physician", "Professor",
+                                         "Alchemist"])))) or \
+                    (pName == "Monk/Nun" and not (bio.getAttribute("Per") >= 15 and bio.getAttribute(
+                        "Int") >= 15 and bio.getAttribute("Chr") >= 15 and bio.getSkill(
+                        "Relg") >= 5 and bio.hasExperienceAsAnyOf(
+                        ["Noble Heir", "Courtier", "Manorial Lord", "Novice Mon/Nun", "Monk/Nun", "Friar", "Priest",
+                         "Abbot", "Bishop", "Student", "Clerk", "Physician", "Professor", "Alchemist"]))) or \
+                    (pName == "Friar" and not ("male" in bio.path and bio.hasExperienceAsAnyOf(
+                        ["Hermit", "Novice Monk/Nun", "Monk/Nun", "Priest", "Abbot", "Bishop"]))) or \
+                    (pName == "Priest" and not (
+                                                "male" in bio.path and bio.getAttribute(
+                                            "Per") >= 20 and bio.getAttribute(
+                                        "Int") >= 20 and bio.getAttribute("Chr") >= 20 and (bio.hasExperienceAsAnyOf(
+                                ["Manorial Lord", "Priest", "Abbot", "Bishop"]) or bio.lastProfessionIn(
+                                ["Noble Heir", "Courtier", "Village Schulz", "Monk/Nun", "Clerk", "Professor"]) or (
+                                        bio.prevProfessionIn(["Novice Monk/Nun", "Oblate", "Student", "Friar"],
+                                                             2) and bio.prevProfessionIn(
+                                        ["Novice Monk/Nun", "Oblate", "Student", "Friar"], 1))))) or \
                     (not pName in ["Recruit", "Veteran", "Soldier"]):
                 profReqMet = False
             else:
@@ -162,8 +193,6 @@ def explo(bio, phase, subphase):
             bio.age = oage
             bio.path = opath
             # todo check that only x skillups are allowed for each profession
-
-
     if phase >= 3 and subphase > 0:
         # assign points to skills (attributes are fixed)
         opath = bio.path
