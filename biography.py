@@ -11,6 +11,7 @@ class Biography:
     childhood = -1
     sex = -1
     occupations = []
+    skillBudget = []
 
     def toCSV(self):
         return str(self.age) + ", " + str(self.EP) + ", " + \
@@ -20,7 +21,6 @@ class Biography:
         # children cannot increase attributes over 40
         if self.attributes[attributeNo] >= 40 and self.age == 15:
             return False
-
         # up to 30 1 point per, 30 to 39 2 points per and 40 costs 3 points
         if self.attributes[attributeNo] < 30:
             epcost = 1
@@ -114,7 +114,9 @@ class Biography:
             return self.EPNeededToRaiseSkillFrom1toX(y) - self.EPNeededToRaiseSkillFrom1toX(x)
 
     def canIncreaseSkill(self, skillNo):
-        return self.EP >= self.EPNeededToRaiseSkillTo(skillNo, self.skills[skillNo] + 1)
+        if self.EP < self.EPNeededToRaiseSkillTo(skillNo, self.skills[skillNo] + 1):
+            return False
+        return True
 
     def shrinkPath(self):
         result = ""

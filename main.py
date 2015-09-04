@@ -135,7 +135,7 @@ def explo(bio, phase, subphase):
                                     bio.hasExperienceAsAnyOf(["Manorial Lord", "Knight"]) or bio.lastProfessionIn(
                                     ["Captain", "Courtier", "Noble Heir", "Abbot", "Bishop"]) or (
                                             "Nobility" in bio.path and bio.age >= 20)))) or \
-                    (pName == "Manorial Lord" and not (bio.getLastProfession() == "Manorial Lord" or (
+                    (pName == "Manorial Lord" and not (bio.getLastProfession(1) == "Manorial Lord" or (
                                 bio.prevProfessionIn(["Noble Heir", "Courtier", "Abbot", "Bishop"],
                                                      1) and bio.prevProfessionIn(
                                 ["Noble Heir", "Courtier", "Abbot", "Bishop"], 2)))) or \
@@ -166,33 +166,40 @@ def explo(bio, phase, subphase):
                                         bio.prevProfessionIn(["Novice Monk/Nun", "Oblate", "Student", "Friar"],
                                                              2) and bio.prevProfessionIn(
                                         ["Novice Monk/Nun", "Oblate", "Student", "Friar"], 1))))) or \
+                    (pName == "Abbot" and not (bio.getAttribute("Per") >= 20 and bio.getAttribute(
+                        "Int") >= 20 and bio.getAttribute("Chr") >= 20 and bio.getSkill("Relg") >= 15 and (
+                                bio.lastProfessionIn(
+                                    ["Noble Heir", "Courtier", "Manorial Lord", "Priest", "Abbot", "Bishop"]) or (
+                                        bio.prevProfessionIn(["Monk/Nun", "Professor"], 1) and bio.prevProfessionIn(
+                                        ["Monk/Nun", "Professor"], 2))))) or \
                     (not pName in ["Recruit", "Veteran", "Soldier"]):
                 profReqMet = False
             else:
                 profReqMet = True
 
-            if profReqMet:
+            if profReqMet == True:
                 bio.path += "|" + definitions.professions[prof]
-            bio.age += 5
-            for i in range(0, len(definitions.attributes)):
-                # Str and End do not receive occupation increases or decreases after the age of 40
-                if bio.age - 5 <= 40 or (
-                                definitions.attributes[i][0] != "Str" and definitions.attributes[i][0] != "End"):
-                    bio.attributes[i] += definitions.professionattributeoffsets[prof][i]
-            for i in range(0, len(definitions.skills)):
-                bio.skills[i] += definitions.professionskilloffsets[prof][i]
-            bio.EP += definitions.professionepoffsets[prof]
-            bio.occupations.append(prof)
-            explo(bio, phase, subphase + 1)
-            bio.occupations.pop()
-            for i in range(0, len(definitions.attributes)):
-                bio.attributes[i] -= definitions.professionattributeoffsets[prof][i]
-            for i in range(0, len(definitions.skills)):
-                bio.skills[i] -= definitions.professionskilloffsets[prof][i]
-            bio.EP = oEP
-            bio.age = oage
-            bio.path = opath
-            # todo check that only x skillups are allowed for each profession
+                bio.age += 5
+                for i in range(0, len(definitions.attributes)):
+                    # Str and End do not receive occupation increases or decreases after the age of 40
+                    if bio.age - 5 <= 40 or (
+                                    definitions.attributes[i][0] != "Str" and definitions.attributes[i][0] != "End"):
+                        bio.attributes[i] += definitions.professionattributeoffsets[prof][i]
+                for i in range(0, len(definitions.skills)):
+                    bio.skills[i] += definitions.professionskilloffsets[prof][i]
+                bio.EP += definitions.professionepoffsets[prof]
+                bio.occupations.append(prof)
+                bio.skillBudget = definitions.professionbonusskilloffsets[prof]
+                explo(bio, phase, subphase + 1)
+                bio.occupations.pop()
+                for i in range(0, len(definitions.attributes)):
+                    bio.attributes[i] -= definitions.professionattributeoffsets[prof][i]
+                for i in range(0, len(definitions.skills)):
+                    bio.skills[i] -= definitions.professionskilloffsets[prof][i]
+                bio.EP = oEP
+                bio.age = oage
+                bio.path = opath
+                # todo check that only x skillups are allowed for each profession
     if phase >= 3 and subphase > 0:
         # assign points to skills (attributes are fixed)
         opath = bio.path
@@ -201,16 +208,17 @@ def explo(bio, phase, subphase):
         if minSkill == -1:
             minSkill = 0
         for skl in range(minSkill, len(definitions.skills)):
-            if bio.canIncreaseSkill(skl):
+            if bio.canIncreaseSkill(skl) and bio.skillBudget[skl] > 0:
                 bio.path += "|+" + definitions.skills[skl][0]
                 bio.skills[skl] += 1
                 bio.EP -= bio.skillIncreaseCost(skl)
+                bio.skillBudget[skl] -= 1
                 explo(bio, phase, subphase + 1)
                 explo(bio, phase + 1, 0)
+                bio.skillBudget[skl] += 1
                 bio.path = opath
                 bio.skills[skl] -= 1
                 bio.EP = oEP
-
 
 bio = biography.Biography()
 header = "age, ep"
