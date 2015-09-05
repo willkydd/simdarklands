@@ -4,10 +4,26 @@ import definitions
 __author__ = 'willkydd'
 
 
+def setupMisc():
+    header = "age, ep"
+    for i in range(0, len(definitions.attributes)):
+        header += ", " + definitions.attributes[i][0]
+    for i in range(0, len(definitions.skills)):
+        header += ", " + definitions.skills[i][0]
+    header += ", path"
+    print(header)
+    # check which is the maximum possible attribute increase from one professional choice
+    for i in range(0, len(definitions.attributes)):
+        for j in range(0, len(definitions.professions)):
+            if definitions.professionattributeoffsets[j][i] > definitions.maximumProfessionAttributeOffset[i]:
+                definitions.maximumProfessionAttributeOffset[i] = definitions.professionattributeoffsets[j][i]
+
+
+
 def explo(bio, phase, subphase):
     # print(str(phase)+"/"+str(subphase))
-    if phase >= 3 + definitions.MAX_PROFS or bio.age >= definitions.MAX_AGE:
-        if bio.EP == 0:
+    if phase >= 3 + definitions.MAX_PROFS or bio.age >= definitions.MAX_AGE or not bio.canReachMinFinalAttributes():
+        if bio.EP == 0 and (bio.age == definitions.MAX_AGE or len(bio.occupations) == definitions.MAX_PROFS):
             print(bio.toCSV())
         return
     if phase == 0:
@@ -53,7 +69,7 @@ def explo(bio, phase, subphase):
             bio.age -= 15
             bio.path = opath
             bio.childhood = -1
-    if phase == 2 and subphase > 0 and not bio.failChildHoodMinAttributes():
+    if phase == 2 and subphase > 0:
         # pick way to distribute childhood ep to attributes
         opath = bio.path
         oEP = bio.EP
@@ -172,7 +188,20 @@ def explo(bio, phase, subphase):
                                     ["Noble Heir", "Courtier", "Manorial Lord", "Priest", "Abbot", "Bishop"]) or (
                                         bio.prevProfessionIn(["Monk/Nun", "Professor"], 1) and bio.prevProfessionIn(
                                         ["Monk/Nun", "Professor"], 2))))) or \
-                    (not pName in ["Recruit", "Veteran", "Soldier"]):
+                    (pName == "Bishop" and not (bio.getAttribute("Per") >= 25 and bio.getAttribute(
+                        "Int") >= 25 and bio.getAttribute("Chr") >= 25 and (
+                                bio.lastProfessionIn(["Abbot", "Bishop"]) or (
+                                        bio.prevProfessionIn(["Courtier", "Manorial Lord", "Priest"],
+                                                             1) and bio.prevProfessionIn(
+                                        ["Courtier", "Manorial Lord", "Priest"], 2))))) or \
+                    (pName == "Oblate" and (bio.getAttribute("Int") <= 11 or (bio.age == 15 and (
+                                    "Urban Commoners" in bio.path or "Country Commoners" in bio.path)) or bio.hasExperienceAsAnyOf(
+                        ["Novice Monk/Nun", "Monk/Nun", "Friar", "Priest", "Abbot", "Bishop", "Clerk", "Professor",
+                         "Physician", "Alchemist"]))) or \
+                    (pName == "Student" and not (bio.age == 15 or (bio.getAttribute("Int") >= 12 and bio.getSkill(
+                        "R&Wr") >= 6 and bio.lastProfessionIn(
+                        ["Recruit", "Soldier", "Veteran", "Hermit", "Apprentice Craftsman", "Journeyman Craftsman",
+                         "Noble Heir", "Swindler", "Student"])))):
                 profReqMet = False
             else:
                 profReqMet = True
@@ -220,12 +249,7 @@ def explo(bio, phase, subphase):
                 bio.skills[skl] -= 1
                 bio.EP = oEP
 
+
+setupMisc()
 bio = biography.Biography()
-header = "age, ep"
-for i in range(0, len(definitions.attributes)):
-    header += ", " + definitions.attributes[i][0]
-for i in range(0, len(definitions.skills)):
-    header += ", " + definitions.skills[i][0]
-header += ", path"
-print(header)
 explo(bio, 0, 0)

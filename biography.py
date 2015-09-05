@@ -86,16 +86,7 @@ class Biography:
             retval = 29 + 20 + (x - 39) * 3
         return retval
 
-    def failChildHoodMinAttributes(self):
-        epNeeded = 0
-        for i in range(0, len(definitions.CHILDHOOD_ATTR_FLOORS)):
-            epNeeded += self.EPNeededToRaiseAttributeTo(i, definitions.CHILDHOOD_ATTR_FLOORS[i])
-            if self.EP < epNeeded:
-                return True
-        # if self.EP<epNeeded:
-        #    print("aborting:")
-        #    print(self.toCSV())
-        return self.EP < epNeeded
+
 
     def EPNeededToRaiseSkillFrom1toX(self, x):
         retval = 0
@@ -149,7 +140,7 @@ class Biography:
         return False
 
     def getLastProfession(self, levels):
-        if len(self.occupations) == 0:
+        if len(self.occupations) < levels:
             return -1
         else:
             return self.occupations[-levels]
@@ -175,3 +166,29 @@ class Biography:
             if definitions.professionindices[professions[i]] == lp:
                 return True
         return False
+
+    def canReachMinFinalAttributes(self):
+        # todo Take aging penalties and STR/EN not taking bonuses after 40 into account
+        # the number of attribute points needed to reach the targets
+        attrDeficit = [0] * len(definitions.attributes)
+        for i in range(0, len(definitions.attributes)):
+            attrDeficit[i] = definitions.FINAL_ATTR_FLOORS[i] - self.attributes[i]
+        # number of professions already taken
+        numProfsTaken = int((max(self.age, 15) - 15) / 5)
+        # the number of attribute points gainable
+        gainableAttributes = [0] * len(definitions.attributes)
+        for i in range(0, len(definitions.attributes)):
+            gainableAttributes[i] += definitions.maximumProfessionAttributeOffset[i] * (
+                definitions.MAX_PROFS - numProfsTaken)
+        if self.age == 15:
+            for i in range(0, len(definitions.attributes)):
+                gainableAttributes[i] += self.EP
+        if self.age < 15:
+            return True
+        for i in range(0, len(definitions.attributes)):
+            if gainableAttributes[i] < attrDeficit[i]:
+                print(self.toCSV() + " REJECTED because " + definitions.attributes[i][0] + " cannot reach " + str(
+                    definitions.FINAL_ATTR_FLOORS[i]) + " from " + str(self.attributes[i]) + " with only " + str(
+                    gainableAttributes[i]) + " points still gainable.")
+                return False
+        return True

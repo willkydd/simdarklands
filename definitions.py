@@ -9,6 +9,7 @@ attributes = [["End", "Endurance"],
 attributeindices = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
 
 CHILDHOOD_ATTR_FLOORS = [36, 35, 0, 0, 30, 23]
+FINAL_ATTR_FLOORS = [36, 35, 0, 0, 32, 24]
 MAX_PROFS = 3
 MAX_AGE = 65
 
@@ -47,7 +48,7 @@ skillindices = {"wEdg": 0,
                 "Virt": 9,
                 "SpkC": 10,
                 "SpkL": 11,
-                "R&W": 12,
+                "R&Wr": 12,
 
                 "Heal": 13,
                 "Artf": 14,
@@ -193,3 +194,5 @@ professionbonusskilloffsets = [[4, 4, 7, 4, 6, 7, 4, 0, 2, 2, 2, 0, 0, 2, 2, 5, 
 agingattributepenalities = {30: [-1, -1, -1, 0, 0, 0], 35: [-2, -1, -2, 0, 0, 0], 40: [-2, -2, -2, 0, 0, 0],
                             45: [-3, -2, -2, -1, 0, -1], 50: [-3, -2, -3, -1, 0, -1], 55: [-3, -3, -3, -2, -1, -2],
                             60: [-5, -4, -4, -3, -2, -3], 65: [-6, -6, -4, -3, -2, -3]}
+
+maximumProfessionAttributeOffset = [0, 0, 0, 0, 0, 0]
