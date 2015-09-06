@@ -6,12 +6,6 @@ attributes = [["End", "Endurance"],
               ["Per", "Perception"],
               ["Int", "Intelligence"],
               ["Chr", "Charisma"]]
-attributeindices = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
-
-CHILDHOOD_ATTR_FLOORS = [36, 35, 0, 0, 30, 23]
-FINAL_ATTR_FLOORS = [36, 35, 0, 0, 32, 24]
-MAX_PROFS = 3
-MAX_AGE = 65
 
 skills = [["wEdg", "Edge Weapons"],
           ["wImp", "Imp Weapons"],
@@ -26,7 +20,7 @@ skills = [["wEdg", "Edge Weapons"],
           ["Virt", "Virtue"],
           ["SpkC", "Common"],
           ["SpkL", "Latin"],
-          ["R&W", "Reading & Writing"],
+          ["R&Wr", "Reading & Writing"],
 
           ["Heal", "Healing"],
           ["Artf", "Artificing"],
@@ -35,6 +29,37 @@ skills = [["wEdg", "Edge Weapons"],
           ["Ride", "Riding"],
           ["WdWs", "Woodwise"]]
 
+# CHILDHOOD_ATTR_FLOORS = [36, 35, 0, 0, 30, 23]
+FINAL_ATTR_FLOORS = [37, 36, 0, 0, 32, 24]
+# FINAL_ATTR_FLOORS = [0] * len(attributes)
+# FINAL_SKILL_FLOORS = {"wEdg": 0, "wImp": 0, "wFll": 0, "wPol": 0, "wThr": 0, "wBow": 0, "wMsD": 0, "Alch": 0,"Relg": 0, "Virt": 0, "SpkC": 0, "SpkL": 0, "R&Wr": 0, "Heal": 0, "Artf": 0, "Stlh": 0,"StrW": 0, "Ride": 0, "WdWs": 0}
+
+FINAL_SKILL_FLOORS = {"wEdg": 20,
+                      "wImp": 15,
+                      "wFll": 0,
+                      "wPol": 0,
+                      "wThr": 18,
+                      "wBow": 0,
+                      "wMsD": 16,
+
+                      "Alch": 34,
+                      "Relg": 29,
+                      "Virt": 32,
+                      "SpkC": 38,
+                      "SpkL": 0,
+                      "R&Wr": 0,
+
+                      "Heal": 0,
+                      "Artf": 0,
+                      "Stlh": 0,
+                      "StrW": 0,
+                      "Ride": 0,
+                      "WdWs": 0}
+
+MAX_PROFS = 5
+MAX_AGE = 65
+
+attributeindices = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
 skillindices = {"wEdg": 0,
                 "wImp": 1,
                 "wFll": 2,
@@ -196,3 +221,6 @@ agingattributepenalities = {30: [-1, -1, -1, 0, 0, 0], 35: [-2, -1, -2, 0, 0, 0]
                             60: [-5, -4, -4, -3, -2, -3], 65: [-6, -6, -4, -3, -2, -3]}
 
 maximumProfessionAttributeOffset = [0, 0, 0, 0, 0, 0]
+maximumProfessionSkillOffsets = [0] * len(skills)
+maximumProfessionSkillBonusOffsets = [0] * len(skills)
+maximumEPOffset = max(professionepoffsets)

@@ -5,26 +5,34 @@ __author__ = 'willkydd'
 
 
 def setupMisc():
-    header = "age, ep"
+    header = "path, age, ep"
     for i in range(0, len(definitions.attributes)):
         header += ", " + definitions.attributes[i][0]
     for i in range(0, len(definitions.skills)):
         header += ", " + definitions.skills[i][0]
-    header += ", path"
     print(header)
     # check which is the maximum possible attribute increase from one professional choice
     for i in range(0, len(definitions.attributes)):
         for j in range(0, len(definitions.professions)):
             if definitions.professionattributeoffsets[j][i] > definitions.maximumProfessionAttributeOffset[i]:
                 definitions.maximumProfessionAttributeOffset[i] = definitions.professionattributeoffsets[j][i]
-
-
+    # check which is the maximum possible skill increase from one professional choice
+    for i in range(0, len(definitions.skills)):
+        for j in range(0, len(definitions.professions)):
+            if definitions.professionskilloffsets[j][i] > definitions.maximumProfessionSkillOffsets[i]:
+                definitions.maximumProfessionSkillOffsets[i] = definitions.professionskilloffsets[j][i]
+    # check which is the maximum possible skill increase from one professional choice
+    for i in range(0, len(definitions.skills)):
+        for j in range(0, len(definitions.professions)):
+            if definitions.professionbonusskilloffsets[j][i] > definitions.maximumProfessionSkillBonusOffsets[i]:
+                definitions.maximumProfessionSkillBonusOffsets[i] = definitions.professionbonusskilloffsets[j][i]
 
 def explo(bio, phase, subphase):
     # print(str(phase)+"/"+str(subphase))
-    if phase >= 3 + definitions.MAX_PROFS or bio.age >= definitions.MAX_AGE or not bio.canReachMinFinalAttributes():
+    if phase >= 3 + definitions.MAX_PROFS or bio.age >= definitions.MAX_AGE or not bio.canReachMinFinalAttributes() == True or not bio.canReachMinFinalSkills() == True:
         if bio.EP == 0 and (bio.age == definitions.MAX_AGE or len(bio.occupations) == definitions.MAX_PROFS):
             print(bio.toCSV())
+            input("Found one")
         return
     if phase == 0:
         # birth
@@ -47,7 +55,7 @@ def explo(bio, phase, subphase):
             bio.age -= 0
             bio.path = opath
             bio.sex = -1
-    if phase == 2 and subphase == 0:
+    if phase == 2 and subphase == 0 and bio.canReachMinFinalAttributes() == True:
         # picking a childhood
         opath = bio.path
         for childhood in range(0, len(definitions.childhoods)):
@@ -109,104 +117,7 @@ def explo(bio, phase, subphase):
         for prof in range(0, len(definitions.professions)):
             # some code here to test for profession requirements being met
             pName = definitions.professions[prof]
-            # todo needs more conditions here
-            if (pName == "Recruit" and not (bio.age <= 30 and not "Recruit" in bio.path)) or \
-                    (pName == "Soldier" and not bio.hasExperienceAsAnyOf(
-                        ["Recruit", "Soldier", "Veteran", "Captain", "Knight", "Village Schulz", "Bandit"])) or \
-                    (pName == "Veteran" and not bio.hasExperienceAsAnyOf(
-                        ["Soldier", "Veteran", "Captain", "Knights"])) or \
-                    (pName == "Captain" and not (
-                            (bio.getAttribute("Per") >= 20 and bio.getAttribute(
-                                "Int") >= 20 and bio.getAttribute(
-                                "Chr") >= 20 and bio.hasExperienceAsAnyOf(
-                                ["Veteran", "Captain", "Knight", "Village Schulz", "Courtier", "Manorial Lord",
-                                 "Bishop"])))) or \
-                    (pName == "Hunter" and not (bio.getSkill("WdWs") >= 15 and ((bio.age == 15 and (
-                                        "Noble" in bio.path or "Country Crafts" in bio.path or "Country Commoners" in bio.path)) or bio.hasExperienceAsAnyOf(
-                        ["Recruit", "Soldier", "Veteran", "Captain", "Knight", "Friar", "Hermit", "Peddler",
-                         "Travelling Merchant", "Peasant", "Village Schulz", "Hunter", "Bandit"])))) or \
-                    (pName == "Bandit" and not (bio.age == 15 or bio.hasExperienceAsAnyOf(
-                        ["Recruit", "Soldier", "Veteran", "Captain", "Knights", "Peasant", "Hunter", "Friar", "Hermit",
-                         "Village Schulz", "Peddler", "Laborer", "Thief", "Bandit", "Vagabond", "Swindler"]))) or \
-                    (pName == "Peasant" and (
-                                    (bio.age == 15 and (
-                                                    "Nobility" in bio.path or "Wealthy Urban" in bio.path)) or bio.lastProfessionIn(
-                                    ["Captain", "Knight", "Courtier", "Noble Heir", "Priest", "Journeyman Craftsman",
-                                     "Travelling Merchant", "Professor", "Alchemist"]) or bio.hasExperienceAsAnyOf(
-                                ["Manorial Lord", "Abbot", "Bishop", "Merchant Proprietor", "Master Alchemist",
-                                 "Master Craftsman"]))) or \
-                    (pName == "Village Schulz" and not (
-                                bio.hasExperienceAsAnyOf(["Peasant"]) and bio.hasExperienceAsAnyOf(
-                                ["Veteran", "Captain", "Noble Heir", "Knight", "Manorial Lord", "Priest", "Abbot",
-                                 "Bishop",
-                                 "Merchant Proprietor", "Professor", "Village Schulz"]))) or \
-                    (pName == "Noble Heir" and not ("Nobility" in bio.path or "Courtier" in bio.path)) or \
-                    (pName == "Courtier" and not (
-                                    bio.lastProfessionIn(["Village Schulz",
-                                                          "Captain", "Knight",
-                                                          "Priest", "Abbot",
-                                                          "Bishop"]) or bio.hasExperienceAsAnyOf(
-                                    ["Manorial Lord", "Courtier"]) or (bio.age == 15 and "Nobility" in bio.path))) or \
-                    (pName == "Knight" and not (bio.getSkill("Virt") >= 16 and (
-                                    bio.hasExperienceAsAnyOf(["Manorial Lord", "Knight"]) or bio.lastProfessionIn(
-                                    ["Captain", "Courtier", "Noble Heir", "Abbot", "Bishop"]) or (
-                                            "Nobility" in bio.path and bio.age >= 20)))) or \
-                    (pName == "Manorial Lord" and not (bio.getLastProfession(1) == "Manorial Lord" or (
-                                bio.prevProfessionIn(["Noble Heir", "Courtier", "Abbot", "Bishop"],
-                                                     1) and bio.prevProfessionIn(
-                                ["Noble Heir", "Courtier", "Abbot", "Bishop"], 2)))) or \
-                    (pName == "Hermit" and not bio.getSkill("Virt") >= 15) or \
-                    (pName == "Novice Monk/Nun" and not (
-                                not "Novice Monk/Nun" in bio.path and not (
-                                                        bio.getAttribute("Per") >= 15 and bio.getAttribute(
-                                                    "Int") >= 15 and bio.getAttribute("Chr") >= 15 and bio.getSkill(
-                                            "Relg") >= 5 and bio.hasExperienceAsAnyOf(
-                                        ["Noble Heir", "Courtier", "Manorial Lord", "Novice Mon/Nun", "Monk/Nun",
-                                         "Friar",
-                                         "Priest",
-                                         "Abbot", "Bishop", "Student", "Clerk", "Physician", "Professor",
-                                         "Alchemist"])))) or \
-                    (pName == "Monk/Nun" and not (bio.getAttribute("Per") >= 15 and bio.getAttribute(
-                        "Int") >= 15 and bio.getAttribute("Chr") >= 15 and bio.getSkill(
-                        "Relg") >= 5 and bio.hasExperienceAsAnyOf(
-                        ["Noble Heir", "Courtier", "Manorial Lord", "Novice Mon/Nun", "Monk/Nun", "Friar", "Priest",
-                         "Abbot", "Bishop", "Student", "Clerk", "Physician", "Professor", "Alchemist"]))) or \
-                    (pName == "Friar" and not ("male" in bio.path and bio.hasExperienceAsAnyOf(
-                        ["Hermit", "Novice Monk/Nun", "Monk/Nun", "Priest", "Abbot", "Bishop"]))) or \
-                    (pName == "Priest" and not (
-                                                "male" in bio.path and bio.getAttribute(
-                                            "Per") >= 20 and bio.getAttribute(
-                                        "Int") >= 20 and bio.getAttribute("Chr") >= 20 and (bio.hasExperienceAsAnyOf(
-                                ["Manorial Lord", "Priest", "Abbot", "Bishop"]) or bio.lastProfessionIn(
-                                ["Noble Heir", "Courtier", "Village Schulz", "Monk/Nun", "Clerk", "Professor"]) or (
-                                        bio.prevProfessionIn(["Novice Monk/Nun", "Oblate", "Student", "Friar"],
-                                                             2) and bio.prevProfessionIn(
-                                        ["Novice Monk/Nun", "Oblate", "Student", "Friar"], 1))))) or \
-                    (pName == "Abbot" and not (bio.getAttribute("Per") >= 20 and bio.getAttribute(
-                        "Int") >= 20 and bio.getAttribute("Chr") >= 20 and bio.getSkill("Relg") >= 15 and (
-                                bio.lastProfessionIn(
-                                    ["Noble Heir", "Courtier", "Manorial Lord", "Priest", "Abbot", "Bishop"]) or (
-                                        bio.prevProfessionIn(["Monk/Nun", "Professor"], 1) and bio.prevProfessionIn(
-                                        ["Monk/Nun", "Professor"], 2))))) or \
-                    (pName == "Bishop" and not (bio.getAttribute("Per") >= 25 and bio.getAttribute(
-                        "Int") >= 25 and bio.getAttribute("Chr") >= 25 and (
-                                bio.lastProfessionIn(["Abbot", "Bishop"]) or (
-                                        bio.prevProfessionIn(["Courtier", "Manorial Lord", "Priest"],
-                                                             1) and bio.prevProfessionIn(
-                                        ["Courtier", "Manorial Lord", "Priest"], 2))))) or \
-                    (pName == "Oblate" and (bio.getAttribute("Int") <= 11 or (bio.age == 15 and (
-                                    "Urban Commoners" in bio.path or "Country Commoners" in bio.path)) or bio.hasExperienceAsAnyOf(
-                        ["Novice Monk/Nun", "Monk/Nun", "Friar", "Priest", "Abbot", "Bishop", "Clerk", "Professor",
-                         "Physician", "Alchemist"]))) or \
-                    (pName == "Student" and not (bio.age == 15 or (bio.getAttribute("Int") >= 12 and bio.getSkill(
-                        "R&Wr") >= 6 and bio.lastProfessionIn(
-                        ["Recruit", "Soldier", "Veteran", "Hermit", "Apprentice Craftsman", "Journeyman Craftsman",
-                         "Noble Heir", "Swindler", "Student"])))):
-                profReqMet = False
-            else:
-                profReqMet = True
-
-            if profReqMet == True:
+            if bio.profRequirementsMet(pName):
                 bio.path += "|" + definitions.professions[prof]
                 bio.age += 5
                 for i in range(0, len(definitions.attributes)):
