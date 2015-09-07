@@ -5,19 +5,30 @@ import definitions
 
 
 class Biography:
-    attributes = [0] * len(definitions.attributes)
-    skills = [0] * len(definitions.skills)
-    age = 0
-    path = ""
-    EP = 0
-    childhood = -1
-    sex = -1
+    attributes = []
+    skills = []
+    age = None
+    path = None
+    EP = None
+    childhood = None
+    sex = None
     occupations = []
     skillBudget = []
 
+    def __init__(self):
+        self.attributes = [0] * len(definitions.attributes)
+        self.skills = [0] * len(definitions.skills)
+        self.age = 0
+        self.path = ""
+        self.EP = 0
+        self.childhood = -1
+        self.sex = -1
+        self.occupations = []
+        self.skillBudget = []
+
     def toCSV(self):
         return self.shrinkPath() + "," + str(self.age) + ", " + str(self.EP) + ", " + \
-               str(self.attributes).strip("[]") + ", " + str(self.skills).strip("[]") + ", "
+               str(self.attributes).strip("[]") + ", " + str(self.skills).strip("[]")
 
     def canIncreaseAttribute(self, attributeNo):
         # children cannot increase attributes over 40
@@ -52,14 +63,14 @@ class Biography:
             return 2
 
     def getLastAttributeIncreased(self):
-        # switcher = {"End": 0, "Str": 1, "Agi": 2, "Per": 3, "Int": 4, "Chr": 5}
-        switcher = {}
-        for i in range(0, len(definitions.attributes)):
-            switcher[definitions.attributes[i][0]] = i
         if self.path[-4] == "+":
-            return switcher.get(self.path[-3] + self.path[-2] + self.path[-1])
+            lai = self.path[-3] + self.path[-2] + self.path[-1]
+            for i in range(0, len(definitions.attributes)):
+                if definitions.attributes[i][0] == lai:
+                    return i
         else:
             return -1
+        print("getlastattribute error")
 
     def getLastSkillIncreased(self):
         switcher = {}
@@ -87,8 +98,6 @@ class Biography:
         if x > 39:
             retval = 29 + 20 + (x - 39) * 3
         return retval
-
-
 
     def EPNeededToRaiseSkillFrom1toX(self, x):
         retval = 0
@@ -189,10 +198,14 @@ class Biography:
                 gainableAttributes[i] += self.EP
         for i in range(0, len(definitions.attributes)):
             if gainableAttributes[i] < attrDeficit[i]:
-                sys.stderr.write(
-                    self.toCSV() + " REJECTED because " + definitions.attributes[i][0] + " cannot reach " + str(
-                    definitions.FINAL_ATTR_FLOORS[i]) + " from " + str(self.attributes[i]) + " with only " + str(
-                        gainableAttributes[i]) + " points still gainable.\n")
+                definitions.skipCounter += 1
+                if definitions.skipCounter == definitions.skipInterval:
+                    definitions.skipCounter = 0
+                    sys.stderr.write(
+                        self.toCSV() + " REJECTED because " + definitions.attributes[i][0] + " cannot reach " + str(
+                            definitions.FINAL_ATTR_FLOORS[i]) + " from " + str(
+                            self.attributes[i]) + " with only " + str(
+                            gainableAttributes[i]) + " points still gainable.\n")
                 return False
         return True
 
@@ -211,15 +224,19 @@ class Biography:
         gainableEP = definitions.maximumEPOffset * (definitions.MAX_PROFS - numProfsTaken)
         for i in range(0, len(definitions.skills)):
             gainableFreeSkills[i] += definitions.maximumProfessionSkillOffsets[i] * (
-            definitions.MAX_PROFS - numProfsTaken)
+                definitions.MAX_PROFS - numProfsTaken)
             gainableEPSkills[i] += definitions.maximumProfessionSkillBonusOffsets[i] * (
-            definitions.MAX_PROFS - numProfsTaken)
+                definitions.MAX_PROFS - numProfsTaken)
         for i in range(0, len(definitions.skills)):
             if sklDeficit[i] > gainableFreeSkills[i] + max(gainableEPSkills[i], gainableEP):
-                sys.stderr.write(
-                    self.toCSV() + " REJECTED because " + definitions.skills[i][0] + " cannot reach " + str(
-                        definitions.FINAL_SKILL_FLOORS[i]) + " from " + str(self.skills[i]) + " with only " + str(
-                        gainableFreeSkills[i] + max(gainableEPSkills[i], gainableEP)) + " points still gainable.\n")
+                definitions.skipCounter += 1
+                if definitions.skipCounter == definitions.skipInterval:
+                    definitions.skipCounter = 0
+                    sys.stderr.write(
+                        self.toCSV() + " REJECTED because " + definitions.skills[i][0] + " cannot reach " + str(
+                            definitions.FINAL_SKILL_FLOORS.get(i)) + " from " + str(
+                            self.skills[i]) + " with only " + str(
+                            gainableFreeSkills[i] + max(gainableEPSkills[i], gainableEP)) + " points still gainable.\n")
                 return False
         return True
 
@@ -338,8 +355,8 @@ class Biography:
                             bio.prevProfessionIn(["Oblate", "Monk/Nun", "Friar", "Physician"],
                                                  1) and bio.prevProfessionIn(
                             ["Oblate", "Monk/Nun", "Friar", "Physician"], 2))))) or \
-                (pName == "Master Alchemist" and not (bio.getAttribute("Int") > 35) and bio.hasExperienceAsAnyOf(
-                    ["Alchemist"])) or \
+                (pName == "Master Alchemist" and not (bio.getAttribute("Int") > 35 and bio.hasExperienceAsAnyOf(
+                    ["Alchemist"]))) or \
                 (pName == "Vagabond" and (bio.lastProfessionIn(
                     ["Captain", "Knight", "Noble Heir", "Courtier", "Village Schulz", "Priest", "Professor",
                      "Travelling Merchant", "Alchemist"]) or bio.hasExperienceAsAnyOf(
@@ -362,8 +379,7 @@ class Biography:
                              "Master Alchemist",
                              "Journeyman Craftsman",
                              "Master Craftsman",
-                             "Village Schulz"],
-                            1))))) or \
+                             "Village Schulz"]))))) or \
                 (pName == "Local Trader" and not ((bio.age == 15 and (
                                     "Nobility" in bio.path or "Wealthy Urban" in bio.path or "Country Crafts" in bio.path)) or (
                                     bio.getAttribute("Int") >= 12 and bio.getSkill(

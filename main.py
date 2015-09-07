@@ -1,8 +1,11 @@
+import operator
+import copy
+
 import biography
 import definitions
 
 __author__ = 'willkydd'
-
+prioattributes = list()
 
 def setupMisc():
     header = "path, age, ep"
@@ -26,6 +29,12 @@ def setupMisc():
         for j in range(0, len(definitions.professions)):
             if definitions.professionbonusskilloffsets[j][i] > definitions.maximumProfessionSkillBonusOffsets[i]:
                 definitions.maximumProfessionSkillBonusOffsets[i] = definitions.professionbonusskilloffsets[j][i]
+    # setup priorityattributes and skills based on how needed they are to reach targets
+    for i in range(0, len(definitions.attributes)):
+        prioattributes.append([definitions.attributes[i][0], definitions.FINAL_ATTR_FLOORS[i], i])
+    prioattributes.sort(key=operator.itemgetter(1), reverse=True)
+    print(prioattributes)
+    # input("")
 
 def explo(bio, phase, subphase):
     # print(str(phase)+"/"+str(subphase))
@@ -37,62 +46,51 @@ def explo(bio, phase, subphase):
     if phase == 0:
         # birth
         bio.path = "birth"
-        # print(bio.toCSV())
+        bio.age = 0
+        bio.occupations.clear()
         explo(bio, phase + 1, 0)
     if phase == 1:
         # picking sex
-        opath = bio.path
+        obio = copy.deepcopy(bio)
         for sex in range(0, len(definitions.sexes)):
-            bio.path = opath + "|" + definitions.sexes[sex]
+            bio.path = obio.path + "|" + definitions.sexes[sex]
             for i in range(0, len(definitions.attributes)):
                 bio.attributes[i] += definitions.sexattributeoffsets[sex][i]
-            bio.age += 0
             bio.sex = sex
-            # print(bio.toCSV())
             explo(bio, phase + 1, 0)
-            for i in range(0, len(definitions.attributes)):
-                bio.attributes[i] -= definitions.sexattributeoffsets[sex][i]
-            bio.age -= 0
-            bio.path = opath
-            bio.sex = -1
-    if phase == 2 and subphase == 0 and bio.canReachMinFinalAttributes() == True:
+            bio = copy.deepcopy(obio)
+    if phase == 2 and subphase == 0:
         # picking a childhood
-        opath = bio.path
-        for childhood in range(0, len(definitions.childhoods)):
-            bio.path = opath + "|" + definitions.childhoods[childhood]
+        bio.age = 15
+        obio = copy.deepcopy(bio)
+        for ch in range(0, len(definitions.childhoods)):
+            bio.childhood = ch
+            bio.path = obio.path + "|" + definitions.childhoods[ch]
             for i in range(0, len(definitions.attributes)):
-                bio.attributes[i] += definitions.childhoodattributeoffsets[childhood][i]
+                bio.attributes[i] += definitions.childhoodattributeoffsets[ch][i]
             for i in range(0, len(definitions.skills)):
-                bio.skills[i] += definitions.childhoodskilloffsets[childhood][i]
-            bio.EP += definitions.childhoodepoffsets[childhood]
-            bio.age += 15
-            bio.childhood = childhood
-            # print(bio.toCSV())
+                bio.skills[i] += definitions.childhoodskilloffsets[ch][i]
+            bio.EP += definitions.childhoodepoffsets[ch]
             explo(bio, phase, subphase + 1)
-            for i in range(0, len(definitions.attributes)):
-                bio.attributes[i] -= definitions.childhoodattributeoffsets[childhood][i]
-            for i in range(0, len(definitions.skills)):
-                bio.skills[i] -= definitions.childhoodskilloffsets[childhood][i]
-            bio.EP -= definitions.childhoodepoffsets[childhood]
-            bio.age -= 15
-            bio.path = opath
-            bio.childhood = -1
+            bio = copy.deepcopy(obio)
     if phase == 2 and subphase > 0:
         # pick way to distribute childhood ep to attributes
-        opath = bio.path
-        oEP = bio.EP
+        obio = copy.deepcopy(bio)
         minAttr = bio.getLastAttributeIncreased()
         if minAttr == -1:
             minAttr = 0
-        for attr in range(minAttr, len(definitions.attributes)):
-            if bio.canIncreaseAttribute(attr):
-                bio.path = bio.path + "|+" + definitions.attributes[attr][0]
-                bio.attributes[attr] += 1
-                bio.EP -= bio.attributeIncreaseCost(attr)
+        prioMinAttr = 0
+        for i in range(0, len(prioattributes)):
+            if prioattributes[i][2] == minAttr:
+                prioMinAttr = i
+                break
+        for prioAttr in range(prioMinAttr, len(prioattributes)):
+            if bio.canIncreaseAttribute(prioattributes[prioAttr][2]):
+                bio.path = bio.path + "|+" + prioattributes[prioAttr][0]
+                bio.attributes[prioattributes[prioAttr][2]] += 1
+                bio.EP -= bio.attributeIncreaseCost(prioattributes[prioAttr][2])
                 explo(bio, phase, subphase + 1)
-                bio.path = opath
-                bio.attributes[attr] -= 1
-                bio.EP = oEP
+                bio = copy.deepcopy(obio)
         if bio.EP == 0:
             explo(bio, phase + 1, 0)
     if phase >= 3 and subphase == 0:
@@ -110,15 +108,12 @@ def explo(bio, phase, subphase):
             for i in range(0, len(definitions.attributes)):
                 bio.attributes[i] += definitions.agingattributepenalities[bio.age][i]
         # start checking for each occupation's requirements being met or not
-        oage = bio.age
-        opath = bio.path
-        oEP = bio.EP
+        obio = copy.deepcopy(bio)
         # pick occupation
         for prof in range(0, len(definitions.professions)):
-            # some code here to test for profession requirements being met
             pName = definitions.professions[prof]
             if bio.profRequirementsMet(pName):
-                bio.path += "|" + definitions.professions[prof]
+                bio.path += "|" + pName
                 bio.age += 5
                 for i in range(0, len(definitions.attributes)):
                     # Str and End do not receive occupation increases or decreases after the age of 40
@@ -127,23 +122,14 @@ def explo(bio, phase, subphase):
                         bio.attributes[i] += definitions.professionattributeoffsets[prof][i]
                 for i in range(0, len(definitions.skills)):
                     bio.skills[i] += definitions.professionskilloffsets[prof][i]
-                bio.EP += definitions.professionepoffsets[prof]
+                bio.EP = definitions.professionepoffsets[prof]
                 bio.occupations.append(prof)
                 bio.skillBudget = definitions.professionbonusskilloffsets[prof]
                 explo(bio, phase, subphase + 1)
-                bio.occupations.pop()
-                for i in range(0, len(definitions.attributes)):
-                    bio.attributes[i] -= definitions.professionattributeoffsets[prof][i]
-                for i in range(0, len(definitions.skills)):
-                    bio.skills[i] -= definitions.professionskilloffsets[prof][i]
-                bio.EP = oEP
-                bio.age = oage
-                bio.path = opath
-                # todo check that only x skillups are allowed for each profession
+                bio = copy.deepcopy(obio)
     if phase >= 3 and subphase > 0:
         # assign points to skills (attributes are fixed)
-        opath = bio.path
-        oEP = bio.EP
+        obio = copy.deepcopy(bio)
         minSkill = bio.getLastSkillIncreased()
         if minSkill == -1:
             minSkill = 0
@@ -154,11 +140,9 @@ def explo(bio, phase, subphase):
                 bio.EP -= bio.skillIncreaseCost(skl)
                 bio.skillBudget[skl] -= 1
                 explo(bio, phase, subphase + 1)
-                explo(bio, phase + 1, 0)
-                bio.skillBudget[skl] += 1
-                bio.path = opath
-                bio.skills[skl] -= 1
-                bio.EP = oEP
+                if bio.EP == 0:
+                    explo(bio, phase + 1, 0)
+                bio = copy.deepcopy(obio)
 
 
 setupMisc()

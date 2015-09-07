@@ -115,14 +115,14 @@ professions = ["Recruit", "Soldier", "Veteran", "Captain", "Hunter",
 
 professionindices = {"Recruit": 0, "Soldier": 1, "Veteran": 2, "Captain": 3, "Hunter": 4,
                      "Bandit": 5, "Peasant": 6, "Village Schulz": 7, "Noble Heir": 8, "Courtier": 9,
-                     "Knight": 10, "Manorial Lord": 11, "Hermit": 12, "Novice Monk/Nun": 13, "Friar": 14,
-                     "Priest": 15, "Abbot": 16, "Bishop": 17, "Oblate": 18, "Student": 19,
-                     "Clerk": 20, "Physician": 21, "Professor": 22, "Alchemist": 23, "Master Alchemist": 24,
-                     "Vagabond": 25, "Peddler": 26, "Local Trader": 27, "Travelling Merchant": 28,
-                     "Merchant Proprietor": 29,
-                     "Laborer": 30, "Apprentice Craftsman": 31, "Journeyman Craftsman": 32, "Master Craftsman": 33,
-                     "Thief": 34,
-                     "Swindler": 35}
+                     "Knight": 10, "Manorial Lord": 11, "Hermit": 12, "Novice Monk/Nun": 13, "Monk/Nun": 14,
+                     "Friar": 15,
+                     "Priest": 16, "Abbot": 17, "Bishop": 18, "Oblate": 19, "Student": 20,
+                     "Clerk": 21, "Physician": 22, "Professor": 23, "Alchemist": 24, "Master Alchemist": 25,
+                     "Vagabond": 26, "Peddler": 27, "Local Trader": 28, "Travelling Merchant": 29,
+                     "Merchant Proprietor": 30,
+                     "Laborer": 31, "Apprentice Craftsman": 32, "Journeyman Craftsman": 33, "Master Craftsman": 34,
+                     "Thief": 35, "Swindler": 36}
 
 professionepoffsets = [18, 18, 21, 17, 20, 22,
                        28, 24, 21, 12, 16, 16,
@@ -224,3 +224,5 @@ maximumProfessionAttributeOffset = [0, 0, 0, 0, 0, 0]
 maximumProfessionSkillOffsets = [0] * len(skills)
 maximumProfessionSkillBonusOffsets = [0] * len(skills)
 maximumEPOffset = max(professionepoffsets)
+skipInterval = 5000
+skipCounter = 0
